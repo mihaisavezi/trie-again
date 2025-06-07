@@ -45,7 +45,7 @@ export const useAutocomplete = (data, idKey, searchKey) => {
       setSuggestions(results);
 
       // --- NEW LOGIC: Consolidate the paths of the top results ---
-      const topResults = results.slice(0, 3);
+      const topResults = results.slice(0, 6);
       const stringPaths = topResults.map((item) => item[searchKey]);
       if (stringPaths.length > 0) {
         setConsolidatedPath(consolidatePaths(stringPaths));
