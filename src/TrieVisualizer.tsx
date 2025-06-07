@@ -1,6 +1,7 @@
 // src/components/TrieVisualizer.js
 
 import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // --- Styles for the recursive tree visualizer ---
 const styles = {
@@ -35,6 +36,9 @@ const styles = {
     zIndex: 2,
     transition: "all 0.2s ease-in-out",
   },
+  endOfWordNode: {
+    border: "2px solid #68D391", // Tailwind green-400
+  },
   // Style for nodes that are part of the user's input prefix
   prefixNode: {
     backgroundColor: "#3182CE", // Tailwind blue-600
@@ -57,6 +61,12 @@ const styles = {
  * @param {string} prefix - The user's full search term.
  * @param {string} pathSoFar - The path accumulated from parent nodes, used for highlighting.
  */
+const nodeVariants = {
+  initial: { opacity: 0, scale: 0.5 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.5 },
+};
+
 const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
   if (!pathSegment || pathSegment.length === 0) {
     return null; // Base case: end of a path
@@ -70,30 +80,46 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
   // If the current item is a nested array, it represents a branching point.
   if (Array.isArray(currentItem)) {
     return (
-      <div style={styles.branchContainer}>
+      <motion.div style={styles.branchContainer}>
         {/* Render each branch recursively */}
         {currentItem.map((branch, index) => (
-          <PathRenderer
-            key={index}
-            pathSegment={branch}
-            prefix={prefix}
-            pathSoFar={pathSoFar}
-          />
+          <AnimatePresence key={index}>
+            <PathRenderer
+              pathSegment={branch}
+              prefix={prefix}
+              pathSoFar={pathSoFar}
+            />
+          </AnimatePresence>
         ))}
-      </div>
+      </motion.div>
     );
   }
 
   // --- LINEAR PATH LOGIC ---
-  // Otherwise, the current item is a single character.
-  const char = currentItem;
+  // Otherwise, the current item is an object like { char: 'a', isEndOfWord: true }
+  const charObject = currentItem; // currentItem is now an object
+  const char = charObject.char;
+  const isEndOfWord = charObject.isEndOfWord;
   const newPathSoFar = pathSoFar + char;
   const isPrefixPart = prefix.toLowerCase().startsWith(newPathSoFar.toLowerCase());
+
+  const nodeStyle = {
+    ...styles.node,
+    ...(isPrefixPart && styles.prefixNode),
+    ...(isEndOfWord && styles.endOfWordNode), // Apply endOfWordNode style
+  };
+
   return (
-    <div style={styles.nodeContainer}>
-      <div style={{ ...styles.node, ...(isPrefixPart && styles.prefixNode) }}>
+    <motion.div
+      style={styles.nodeContainer}
+      variants={nodeVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <motion.div style={nodeStyle} variants={nodeVariants}> {/* Apply combined style */}
         {char}
-      </div>
+      </motion.div>
 
       {/* Render an arrow if there's more to this path */}
       {restOfPath.length > 0 ? (
@@ -105,12 +131,14 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
       ) : null}
 
       {/* Continue rendering the rest of the path segment */}
-      <PathRenderer
-        pathSegment={restOfPath}
-        prefix={prefix}
-        pathSoFar={newPathSoFar}
-      />
-    </div>
+      <AnimatePresence>
+        <PathRenderer
+          pathSegment={restOfPath}
+          prefix={prefix}
+          pathSoFar={newPathSoFar}
+        />
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
@@ -121,5 +149,9 @@ export const TrieVisualizer = ({ path, prefix }) => {
     );
   }
 
-  return <PathRenderer pathSegment={path} prefix={prefix.toLowerCase()} />;
+  return (
+    <AnimatePresence>
+      <PathRenderer pathSegment={path} prefix={prefix.toLowerCase()} />
+    </AnimatePresence>
+  );
 };

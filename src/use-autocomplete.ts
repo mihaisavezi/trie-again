@@ -46,9 +46,11 @@ export const useAutocomplete = (data, idKey, searchKey) => {
 
       // --- NEW LOGIC: Consolidate the paths of the top results ---
       const topResults = results.slice(0, 6);
-      const stringPaths = topResults.map((item) => item[searchKey]);
-      if (stringPaths.length > 0) {
-        setConsolidatedPath(consolidatePaths(stringPaths));
+      // Get paths with isEndOfWord information from the trie for each result
+      const objectPaths = topResults.map(item => trie.getWordPath(item[searchKey])).filter(p => p.length > 0);
+
+      if (objectPaths.length > 0) {
+        setConsolidatedPath(consolidatePaths(objectPaths));
       } else {
         setConsolidatedPath([]);
       }
