@@ -16,7 +16,7 @@ const styles = {
   branchContainer: {
     display: "flex",
     flexDirection: "row",
-    gap: "40px", // Space between branches
+    gap: "50px", // Increased gap
     alignItems: "flex-start", // Align branches from the top
     paddingTop: "10px",
   },
@@ -28,16 +28,22 @@ const styles = {
     width: "30px",
     height: "30px",
     borderRadius: "50%",
-    fontWeight: "bold",
+    fontWeight: "normal", // Changed from bold
     fontFamily: "monospace",
     border: "2px solid #4A5568", // Tailwind gray-600
     backgroundColor: "#2D3748", // Tailwind gray-800
     color: "#E2E8F0", // Tailwind gray-200
     zIndex: 2,
     transition: "all 0.2s ease-in-out",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)", // Added boxShadow
   },
   endOfWordNode: {
     border: "2px solid #68D391", // Tailwind green-400
+  },
+  hoveredNode: {
+    backgroundColor: "#4A5568", // Tailwind gray-600 (darker than default node bg)
+    // Ensure it doesn't shrink the node if border changes, or use outline
+    // For now, just a backgroundColor change.
   },
   // Style for nodes that are part of the user's input prefix
   prefixNode: {
@@ -48,9 +54,9 @@ const styles = {
   },
   // Style for the down-arrow connector
   arrow: {
-    fontSize: "24px",
+    fontSize: "28px", // Increased fontSize
     color: "#718096", // Tailwind gray-500
-    lineHeight: "0.5",
+    lineHeight: "0.4", // Reduced lineHeight
     margin: "4px 0",
   },
 };
@@ -67,7 +73,7 @@ const nodeVariants = {
   exit: { opacity: 0, scale: 0.5 },
 };
 
-const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
+const PathRenderer = ({ pathSegment, prefix, pathSoFar = "", hoveredPath, setHoveredPath }) => {
   if (!pathSegment || pathSegment.length === 0) {
     return null; // Base case: end of a path
   }
@@ -88,6 +94,8 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
               pathSegment={branch}
               prefix={prefix}
               pathSoFar={pathSoFar}
+              hoveredPath={hoveredPath}
+              setHoveredPath={setHoveredPath}
             />
           </AnimatePresence>
         ))}
@@ -102,11 +110,12 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
   const isEndOfWord = charObject.isEndOfWord;
   const newPathSoFar = pathSoFar + char;
   const isPrefixPart = prefix.toLowerCase().startsWith(newPathSoFar.toLowerCase());
+  const isHoveredPart = hoveredPath && hoveredPath.startsWith(newPathSoFar);
 
   const nodeStyle = {
     ...styles.node,
-    ...(isPrefixPart && styles.prefixNode),
-    ...(isEndOfWord && styles.endOfWordNode), // Apply endOfWordNode style
+    ...(isPrefixPart ? styles.prefixNode : (isHoveredPart && styles.hoveredNode)),
+    ...(isEndOfWord && styles.endOfWordNode), // Apply endOfWordNode style additively
   };
 
   return (
@@ -117,7 +126,12 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
       animate="animate"
       exit="exit"
     >
-      <motion.div style={nodeStyle} variants={nodeVariants}> {/* Apply combined style */}
+      <motion.div
+        style={nodeStyle}
+        variants={nodeVariants}
+        onMouseEnter={() => setHoveredPath(newPathSoFar)}
+        // onMouseLeave is handled by parent container for now
+      > {/* Apply combined style */}
         {char}
       </motion.div>
 
@@ -136,6 +150,8 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
           pathSegment={restOfPath}
           prefix={prefix}
           pathSoFar={newPathSoFar}
+          hoveredPath={hoveredPath}
+          setHoveredPath={setHoveredPath}
         />
       </AnimatePresence>
     </motion.div>
@@ -143,6 +159,8 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
 };
 
 export const TrieVisualizer = ({ path, prefix }) => {
+  const [hoveredPath, setHoveredPath] = React.useState(null);
+
   if (!path || path.length === 0) {
     return (
       <p style={{ color: "#A0AEC0" }}>Suggestions will be visualized here.</p> // Tailwind gray-400
@@ -150,8 +168,15 @@ export const TrieVisualizer = ({ path, prefix }) => {
   }
 
   return (
-    <AnimatePresence>
-      <PathRenderer pathSegment={path} prefix={prefix.toLowerCase()} />
-    </AnimatePresence>
+    <div onMouseLeave={() => setHoveredPath(null)}> {/* Clear hover on mouse leave from container */}
+      <AnimatePresence>
+        <PathRenderer
+          pathSegment={path}
+          prefix={prefix.toLowerCase()}
+          hoveredPath={hoveredPath}
+          setHoveredPath={setHoveredPath}
+        />
+      </AnimatePresence>
+    </div>
   );
 };
