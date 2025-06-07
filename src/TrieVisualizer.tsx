@@ -18,7 +18,6 @@ const styles = {
     flexDirection: "row",
     gap: "40px", // Space between branches
     alignItems: "flex-start", // Align branches from the top
-    paddingTop: "10px",
   },
   // Style for a single character node
   node: {
