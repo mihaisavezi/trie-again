@@ -15,7 +15,7 @@ const styles = {
   branchContainer: {
     display: "flex",
     flexDirection: "row",
-    gap: "140px", // Space between branches
+    gap: "40px", // Space between branches
     alignItems: "flex-start", // Align branches from the top
     paddingTop: "10px",
   },
@@ -29,22 +29,23 @@ const styles = {
     borderRadius: "50%",
     fontWeight: "bold",
     fontFamily: "monospace",
-    border: "2px solid #ced4da",
-    backgroundColor: "#ffffff",
+    border: "2px solid #4A5568", // Tailwind gray-600
+    backgroundColor: "#2D3748", // Tailwind gray-800
+    color: "#E2E8F0", // Tailwind gray-200
     zIndex: 2,
     transition: "all 0.2s ease-in-out",
   },
   // Style for nodes that are part of the user's input prefix
   prefixNode: {
-    backgroundColor: "#cfe2ff",
-    borderColor: "#0d6efd",
-    color: "#073b8a",
+    backgroundColor: "#3182CE", // Tailwind blue-600
+    borderColor: "#63B3ED", // Tailwind blue-400
+    color: "#FFFFFF", // White
     transform: "scale(1.1)",
   },
   // Style for the down-arrow connector
   arrow: {
     fontSize: "24px",
-    color: "#adb5bd",
+    color: "#718096", // Tailwind gray-500
     lineHeight: "0.5",
     margin: "4px 0",
   },
@@ -116,7 +117,7 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "" }) => {
 export const TrieVisualizer = ({ path, prefix }) => {
   if (!path || path.length === 0) {
     return (
-      <p style={{ color: "#6c757d" }}>Suggestions will be visualized here.</p>
+      <p style={{ color: "#A0AEC0" }}>Suggestions will be visualized here.</p> // Tailwind gray-400
     );
   }
 
