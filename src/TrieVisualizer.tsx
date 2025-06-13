@@ -40,7 +40,7 @@ const styles = {
     border: "2px solid #68D391", // Tailwind green-400
   },
   hoveredNode: {
-    backgroundColor: "#4A5568", // Tailwind gray-600 (darker than default node bg)
+    backgroundColor: "darkslateblue", // Tailwind gray-600 (darker than default node bg)
     // Ensure it doesn't shrink the node if border changes, or use outline
     // For now, just a backgroundColor change.
   },
@@ -113,7 +113,7 @@ const PathRenderer = ({ pathSegment, prefix, pathSoFar = "", hoveredPath, setHov
 
   const nodeStyle = {
     ...styles.node,
-    ...(isPrefixPart ? styles.prefixNode : (isHoveredPart && styles.hoveredNode)),
+    ...((isPrefixPart && !isHoveredPart) ? styles.prefixNode : (isHoveredPart && styles.hoveredNode)),
     ...(isEndOfWord && styles.endOfWordNode), // Apply endOfWordNode style additively
   };
 
