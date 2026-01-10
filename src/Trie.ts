@@ -50,8 +50,8 @@ export class Trie {
       if (!node.children[char]) {
         return []; // Word not found, return empty path
       }
-      path.push(char);
-      node = node.children[char];
+      node = node.children[char]; // Move to the child node first
+      path.push({ char, isEndOfWord: node.isEndOfWord }); // Then record its char and endOfWord status
     }
     return path;
   }
